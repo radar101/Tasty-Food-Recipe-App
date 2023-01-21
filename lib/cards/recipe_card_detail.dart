@@ -1,63 +1,45 @@
-import 'dart:convert';
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
+import 'package:food_recipe/Model/feed_to_id.dart';
+import 'package:food_recipe/Model/show_nutrition.dart';
+import 'package:food_recipe/Model/total_servings.dart';
 import 'package:food_recipe/cards/instruction_card.dart';
 import 'package:food_recipe/constants.dart';
+import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-import '../services/networking.dart';
 
 class RecipeCard extends StatefulWidget {
-  const RecipeCard({Key? key}) : super(key: key);
+  const RecipeCard({Key? key, required this.id}) : super(key: key);
+  final int id;
 
   @override
   State<RecipeCard> createState() => _RecipeCardState();
 }
 
 class _RecipeCardState extends State<RecipeCard> {
-  Map<String, String> ingrediendts = {
-    "bread flour, plus more dusting": "2 cups",
-    "shredded sharp cheddar cheese": "1 cup",
-    "jalapeno, seeded and coarsely chopped": "1 1/2",
-    "jalapeno sliced into wings": "3/4",
-    "koshar salt": "3/4 tablespoon",
-    "warm water": "1 1/2 cups",
-  };
-
-  String recipeTitle = "The title of the recipe";
-  String recipeDescription = 'In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document or a typeface without relying on meaningful content. Lorem ipsum may be used as a placeholder before final copy is available.';
-
-
-
-  Future<List> getData() async {
-    var url = "https://tasty.p.rapidapi.com/recipes/list?from=0&size=20&q=egg";
-    NetworkHelper networkHelper = NetworkHelper(url);
-    var recipeData = await networkHelper.getData();
-    return recipeData;
-    // var recipeName =  recipeData['results'][0]['name'];
-    // recipeTitle = recipeName;
-    // print(recipeName);
-    // recipeDescription = recipeData['results'][0]['description'];
-    // print(recipeDescription);
-    //
-    // for (dynamic recipe in recipeData['results'][0]['instructions']) {
-    //   print(recipe['display_text']);
-    // }
-    //
-    // setState(() {
-    //
-    // });
-  }
-
   @override
   void initState() {
-    // TODO: implement initState
+    // var recipeProvider = Provider.of<Recipe>(context, listen: false);
+    // recipeProvider.changeData();
+    FeedToId feedToId = FeedToId();
+    feedToId.getData(widget.id);
+    var recipeProvider = Provider.of<FeedToId>(context, listen: false);
+    recipeProvider.changeData(widget.id);
+    TotalServings servings = TotalServings();
+    print("no of servings are: ${servings.getTotalServings()}");
     super.initState();
-    getData();
   }
 
   @override
   Widget build(BuildContext context) {
+    List<String> nutritionType = [
+      'carbohydrates',
+      'fiber',
+      'protein',
+      'fat',
+      'calories'
+    ];
+
     return Scaffold(
       appBar: AppBar(
         actions: [
@@ -81,7 +63,7 @@ class _RecipeCardState extends State<RecipeCard> {
         ),
         leading: IconButton(
           onPressed: () => Navigator.of(context).pop(),
-          icon: Icon(Icons.arrow_back_outlined),
+          icon: const Icon(Icons.arrow_back_outlined),
         ),
         centerTitle: true,
         backgroundColor: kAppBackground,
@@ -91,118 +73,219 @@ class _RecipeCardState extends State<RecipeCard> {
           // mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-             Padding(
-              padding: EdgeInsets.only(left: 15),
-              child: Text(
-                recipeTitle,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.left,
-              ),
+            Padding(
+              padding: const EdgeInsets.only(left: 15),
+              child: Consumer<FeedToId>(builder: (context, data, child) {
+                return Text(
+                  data.getTitle()!,
+                  style: kLargeHeading,
+                  textAlign: TextAlign.left,
+                );
+              }),
             ),
-             Padding(
-              padding: EdgeInsets.symmetric(vertical: 8, horizontal: 14),
-              child: Text(
-                recipeDescription,
-                style: const TextStyle(
-                  fontSize: 15,
-                  color: Colors.grey,
-                  overflow: TextOverflow.fade,
-                ),
-              ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 14),
+              child: Consumer<FeedToId>(builder: (context, data, child) {
+                return Text(
+                  data.getDescription()!,
+                  style: kDescriptionText,
+                );
+              }),
             ),
-            Container(
-              child: Column(
-                children: [
-                  Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Ingredients for',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold),
+            Consumer<FeedToId>(
+              builder: (context, data, child) {
+                return Stack(
+                  children: [
+                    SizedBox(
+                        width: double.infinity,
+                        height: 350,
+                        child: Image.network(data.getThumbnailUrl()!)),
+                    Positioned(
+                      left: 150,
+                      top: 150,
+                      child: TextButton(
+                        onPressed: () async {
+                          String url = data.getVideoUrl()!;
+                          final uri = Uri.parse(url);
+                          if (await canLaunchUrl(uri)) {
+                            await launchUrl(uri);
+                          } else {
+                            throw 'Could not launch $url';
+                          }
+                        },
+                        style: ButtonStyle(
+                          backgroundColor: MaterialStatePropertyAll(
+                              Colors.pinkAccent.shade200.withOpacity(0.5)),
+                          shape: MaterialStatePropertyAll(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(90),
+                            ),
+                          ),
                         ),
-                        Container(
-                          /*decoration: BoxDecoration(
-                            shape: BoxShape.rectangle,
-                            border: Border.symmetric(vertical: BorderSide(width: 1, color: Colors.grey), horizontal: BorderSide(width: 1, color: Colors.grey))
-                          ),*/
+                        child: const Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 12),
+                            child: Icon(
+                              Icons.play_arrow_outlined,
+                              color: Colors.white,
+                            )),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+            Column(
+              children: [
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Ingredients for',
+                        style: kSubHeading,
+                      ),
+                      Row(
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              var servingInfo = Provider.of<TotalServings>(
+                                  context,
+                                  listen: false);
+                              servingInfo.decreaseServings();
+                            },
+                            icon: const Icon(
+                              Icons.remove,
+                              color: Colors.pinkAccent,
+                            ),
+                          ),
+                          Consumer<TotalServings>(
+                            builder: (context, totalServings, child) {
+                              return Text(
+                                totalServings.getTotalServings().toString(),
+                                style: const TextStyle(color: Colors.white),
+                              );
+                            },
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              var servingInfo = Provider.of<TotalServings>(
+                                  context,
+                                  listen: false);
+                              servingInfo.increaseServings();
+                            },
+                            icon: const Icon(
+                              Icons.add,
+                              color: Colors.pinkAccent,
+                            ),
+                          ),
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+
+                /// Code to display the ingredients of the recipe
+                Consumer<FeedToId>(builder: (context, list, child) {
+                  return ListView.builder(
+                      scrollDirection: Axis.vertical,
+                      shrinkWrap: true,
+                      itemCount: list.getIngredientData()!.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 10),
                           child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              IconButton(
-                                onPressed: () {},
-                                icon: const Icon(
-                                  Icons.remove,
-                                  color: Colors.pinkAccent,
-                                ),
+                              Text(
+                                list.getIngredientData()![index]![0],
+                                style: const TextStyle(color: Colors.white),
                               ),
-                              const Text(
-                                '4',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                              IconButton(
-                                onPressed: () {},
-                                icon: const Icon(
-                                  Icons.add,
-                                  color: Colors.pinkAccent,
-                                ),
+                              Text(
+                                list.getIngredientData()![index]!.length == 3
+                                    ? "${list.getIngredientData()![index]![1]}  ${list.getIngredientData()![index]![2]}"
+                                    : "${list.getIngredientData()![index]![1]}",
+                                style: const TextStyle(color: Colors.white),
                               ),
                             ],
                           ),
-                        )
-                      ],
-                    ),
-                  ),
-
-                  /// Code to display the ingredients of the recipe
-                  /*ListView.separated(itemBuilder: (context, index){
-                    return Container(
-                      child: Text(ingrediendts[index]!, style: TextStyle(color: Colors.white),),
-                    );
-                  }, separatorBuilder: (BuildContext context, int index) => const Divider(),
-                      itemCount: ingrediendts.length
-                  )*/
-                  Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Nutrition Info',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold),
-                        ),
-                        Row(
-                          children: [
-                            const Text(
-                              'View Info',
-                              style: TextStyle(color: Colors.pinkAccent),
+                        );
+                      });
+                }),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Nutrition Info',
+                        style: kSubHeading,
+                      ),
+                      Row(
+                        children: [
+                          Consumer<ShowNutrition>(
+                              builder: (context, nutrition, child) {
+                            return Text(
+                              nutrition.getShow() ? 'Hide Info' : 'View Info',
+                              style: const TextStyle(color: Colors.pinkAccent),
+                            );
+                          }),
+                          IconButton(
+                            onPressed: () {
+                              var showNutrition = Provider.of<ShowNutrition>(
+                                  context,
+                                  listen: false);
+                              showNutrition.onPress();
+                            },
+                            icon: const Icon(
+                              Icons.add,
+                              color: Colors.pinkAccent,
                             ),
-                            IconButton(
-                              onPressed: () {},
-                              icon: const Icon(
-                                Icons.add,
-                                color: Colors.pinkAccent,
+                          ),
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+                Consumer2<FeedToId, ShowNutrition>(
+                    builder: (context, list, show, child) {
+                  return show.getShow()
+                      ? ListView.builder(
+                          scrollDirection: Axis.vertical,
+                          shrinkWrap: true,
+                          itemCount: nutritionType.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 10),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    nutritionType[index].toUpperCase(),
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                  Text(
+                                    list
+                                        .getNutritionData()![
+                                            nutritionType[index]]
+                                        .toString(),
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                ],
                               ),
-                            ),
-                          ],
-                        )
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                            );
+                          })
+                      : const SizedBox(
+                          height: 0,
+                        );
+                })
+              ],
             ),
             Container(
               decoration: BoxDecoration(
@@ -215,10 +298,7 @@ class _RecipeCardState extends State<RecipeCard> {
                   children: [
                     const Text(
                       'Preparation',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20),
+                      style: kSubHeading,
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(
@@ -238,58 +318,34 @@ class _RecipeCardState extends State<RecipeCard> {
                           padding: EdgeInsets.all(8.0),
                           child: Text(
                             'Step by Step mode',
-                            style: TextStyle(color: Colors.white, fontSize: 20),
+                            style: kSubHeading,
                           ),
                         ),
                       ),
                     ),
-                    FutureBuilder<List>(
-                      future: getData(),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          return ListView.builder(
-                              itemCount: snapshot.data!.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                return Container(
-                                  height: 75,
-                                  color: Colors.white,
-                                  child: Center(
-                                    child: Text(snapshot.data![index]['results'][index]['name'], style: TextStyle(color: Colors.white),),
-                                  ),
-                                );
-                              });
-                        } else if (snapshot.hasError) {
-                          return Text(snapshot.error.toString());
-                        }
-                        // By default show a loading spinner.
-                        return const CircularProgressIndicator();
-                      },
-                    )
+                    Consumer<FeedToId>(builder: (context, list, child) {
+                      return ListView.builder(
+                          scrollDirection: Axis.vertical,
+                          shrinkWrap: true,
+                          itemCount: list.getInstructions()!.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return SizedBox(
+                              height: 75,
+                              // color: kAppBackground,
 
-                    /*InstructionCard(
-                        srNo: '1',
-                        instruction:
-                            'Lorem ipsum is placeholder text commonly used in the graphic, print, and publishing industries for previewing layouts and visual mockups.'),
-                    InstructionCard(
-                        srNo: '1',
-                        instruction:
-                            'Lorem ipsum is placeholder text commonly used in the graphic, print, and publishing industries for previewing layouts and visual mockups.'),
-                    InstructionCard(
-                        srNo: '1',
-                        instruction:
-                            'Lorem ipsum is placeholder text commonly used in the graphic, print, and publishing industries for previewing layouts and visual mockups.'),
-                    InstructionCard(
-                        srNo: '1',
-                        instruction:
-                            'Lorem ipsum is placeholder text commonly used in the graphic, print, and publishing industries for previewing layouts and visual mockups.'),
-                    InstructionCard(
-                        srNo: '1',
-                        instruction:
-                            'Lorem ipsum is p*//*laceholder text commonly used in the graphic, print, and publishing industries for previewing layouts and visual mockups.'),*/
+                              child: Center(
+                                child: InstructionCard(
+                                  srNo: (index + 1).toString(),
+                                  instruction: list.getInstructions()![index],
+                                ),
+                              ),
+                            );
+                          });
+                    })
                   ],
                 ),
               ),
-            )
+            ),
           ],
         ),
       ]),

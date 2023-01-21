@@ -4,7 +4,7 @@ import 'dart:convert';
 import "package:http/http.dart" as http ;
 
 const Map<String, String> _headers = {
-  'X-RapidAPI-Key': '4a21909023mshdde8260e14d7c85p13bd1ejsna6e18650afdb',
+  'X-RapidAPI-Key': '4177a55875mshd582b6dc4520718p18eb0djsnda09eb955e1b',
   'X-RapidAPI-Host': 'tasty.p.rapidapi.com',
 
 };
@@ -15,10 +15,14 @@ class NetworkHelper{
   Future getData() async{
     http.Response response = await http.get(Uri.parse(url), headers: _headers);
     if(response.statusCode == 200) {
+      print("entered");
       String data = response.body;
       var decodedData = jsonDecode(data);
+      print(response.persistentConnection);
+      print(response.statusCode);
       return decodedData;
     }else{
+      print("This is the response we got ${response.statusCode}");
       return response.statusCode;
     }
   }

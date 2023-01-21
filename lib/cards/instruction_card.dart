@@ -10,7 +10,7 @@ class InstructionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsetsDirectional.only(top: 15, start: 8, end: 8)  ,
+      margin: const EdgeInsetsDirectional.only(top: 15, start: 8, end: 8)  ,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         color: Colors.black38,
@@ -30,7 +30,6 @@ class InstructionCard extends StatelessWidget {
               child: Text(
                 instruction,
                 style: const TextStyle(height: 1.5, color: Colors.white, letterSpacing: 2, ),
-
               ),
             ),
           ],
