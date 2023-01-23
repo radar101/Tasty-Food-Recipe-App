@@ -15,14 +15,10 @@ class NetworkHelper{
   Future getData() async{
     http.Response response = await http.get(Uri.parse(url), headers: _headers);
     if(response.statusCode == 200) {
-      print("entered");
       String data = response.body;
       var decodedData = jsonDecode(data);
-      print(response.persistentConnection);
-      print(response.statusCode);
       return decodedData;
     }else{
-      print("This is the response we got ${response.statusCode}");
       return response.statusCode;
     }
   }

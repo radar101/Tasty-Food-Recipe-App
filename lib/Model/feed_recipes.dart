@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import '../services/networking.dart';
 
 class FeedRecipes extends ChangeNotifier {
-  Map<String, List<dynamic>> TotalResults = {};
+  Map<String, List<dynamic>> totalResults = {};
 
-  Map<String, List<dynamic>> getTotalResults() => TotalResults;
+  Map<String, List<dynamic>> getTotalResults() => totalResults;
 
   Future<Map<String, List<dynamic>>> getData() async {
     List<Map<String, dynamic>> recentsList = [];
@@ -14,7 +14,7 @@ class FeedRecipes extends ChangeNotifier {
     NetworkHelper networkHelper = NetworkHelper(url);
     var recipeData = await networkHelper.getData();
 
-    Map<String, List<dynamic>> TotalFeedMap = {};
+    Map<String, List<dynamic>> totalFeedMap = {};
 
     for (int i = 0; i < recipeData['results'].length; i++) {
       if (recipeData['results'][i].length == 5) {
@@ -36,7 +36,7 @@ class FeedRecipes extends ChangeNotifier {
               weeklyList.add(tempMap);
             }
           }
-          TotalFeedMap["Weekly Meal Planning Made Easy"] = weeklyList;
+          totalFeedMap["Weekly Meal Planning Made Easy"] = weeklyList;
         }
         if (recipeData['results'][i]['name'] == "Trending") {
           List<Map<String, dynamic>> weeklyList = [];
@@ -52,7 +52,7 @@ class FeedRecipes extends ChangeNotifier {
             tempMap["recipe_id"] = recipeId;
             weeklyList.add(tempMap);
           }
-          TotalFeedMap["Trending"] = weeklyList;
+          totalFeedMap["Trending"] = weeklyList;
         }
 
         if (recipeData['results'][i]['name'] == "Japanese Inspired") {
@@ -69,7 +69,7 @@ class FeedRecipes extends ChangeNotifier {
             tempMap["recipe_id"] = recipeId;
             weeklyList.add(tempMap);
           }
-          TotalFeedMap["Japanese Inspired"] = weeklyList;
+          totalFeedMap["Japanese Inspired"] = weeklyList;
         }
 
         if (recipeData['results'][i]['name'] == "Japanese Inspired") {}
@@ -97,16 +97,16 @@ class FeedRecipes extends ChangeNotifier {
             recentsList.add(tempMap);
           }
         }
-        print(TotalFeedMap["Recents"]);
+        print(totalFeedMap["Recents"]);
       }
     }
-    TotalFeedMap["Recents"] = recentsList;
-    return TotalFeedMap;
+    totalFeedMap["Recents"] = recentsList;
+    return totalFeedMap;
   }
 
   changeData() async {
     Map<String, List<dynamic>> tempMap = await getData();
-    TotalResults = tempMap;
+    totalResults = tempMap;
     notifyListeners();
   }
 }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../services/networking.dart';
 
 class FeedToId extends ChangeNotifier {
@@ -35,6 +34,33 @@ class FeedToId extends ChangeNotifier {
 
   Map<String, dynamic>? getNutritionData() => _nutritionData;
 
+
+  increaseServings()
+  {
+    int initialServings = _totalServings;
+    for(int i=0;i < _ingredientData.length ; i++){
+      // double oldQuantity = int.parse(_ingredientData[i]![1].replaceAll(RegExp(r'[^0-9]'),'')).toDouble();
+      // double newQuantity = (initialServings.toDouble()+1) / initialServings.toDouble();
+      // newQuantity = newQuantity * oldQuantity;
+      // newQuantity.toString();
+    }
+    _totalServings++;
+    notifyListeners();
+  }
+
+  decreaseServings()
+  {
+    int initialServings = _totalServings;
+    for(int i=0;i < _ingredientData.length ; i++){
+      int oldQuantity = int.parse(_ingredientData[i]![1].replaceAll(RegExp(r'\D'),''));
+      double newQuantity = (initialServings.toDouble() - 1) / initialServings.toDouble();
+      newQuantity = newQuantity * oldQuantity;
+      newQuantity.toString();
+    }
+    _totalServings--;
+    notifyListeners();
+  }
+
   Future<Map<String, dynamic>> getData(int id) async {
     var url =
         "https://tasty.p.rapidapi.com/recipes/get-more-info?id=$id";
@@ -52,13 +78,14 @@ class FeedToId extends ChangeNotifier {
         ingredient+= ', ';
         ingredient += section[j]['extra_comment'];
         String quantity = section[j]['measurements'][0]['quantity'];
-        tempIngredients[j] = [ingredient,quantity];
+        String unit = section[j]['measurements'][0]['unit']['name'];
+        tempIngredients[j] = [ingredient,quantity, unit];
       }else{
         String ingredient = section[j]['ingredient']['name'] ?? section[j]['ingredient']['display_singular'];
         ingredient+= ', ';
         ingredient += section[j]['extra_comment'];
-        String quantity = section[j]['measurements'][1]['quantity'];
-        String unit = section[j]['measurements'][1]['unit']['name'] ?? section[j]['measurements'][1]['unit']['display_singular'];
+        String quantity = section[j]['measurements'][0]['unit']['system'] == "imperial" ? section[j]['measurements'][0]['quantity'] : section[j]['measurements'][1]['quantity'];
+        String unit = section[j]['measurements'][0]['unit']['system'] == "imperial" ? section[j]['measurements'][0]['unit']['name'] : section[j]['measurements'][1]['unit']['name'];
         tempIngredients[j] = [ingredient,quantity, unit];
       }
     }

@@ -40,6 +40,8 @@ dependencies:
   provider: ^6.0.5
   url_launcher: ^6.1.7
   video_player: ^2.5.1
+  group_button: ^5.2.2
+  font_awesome_flutter: ^10.3.0
 
 dev_dependencies:
   flutter_test:

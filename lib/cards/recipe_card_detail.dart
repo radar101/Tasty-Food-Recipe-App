@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:food_recipe/Model/feed_to_id.dart';
 import 'package:food_recipe/Model/show_nutrition.dart';
-import 'package:food_recipe/Model/total_servings.dart';
 import 'package:food_recipe/cards/instruction_card.dart';
 import 'package:food_recipe/constants.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-
 
 class RecipeCard extends StatefulWidget {
   const RecipeCard({Key? key, required this.id}) : super(key: key);
@@ -19,14 +17,9 @@ class RecipeCard extends StatefulWidget {
 class _RecipeCardState extends State<RecipeCard> {
   @override
   void initState() {
-    // var recipeProvider = Provider.of<Recipe>(context, listen: false);
-    // recipeProvider.changeData();
-    FeedToId feedToId = FeedToId();
-    feedToId.getData(widget.id);
+    print("The id is ${widget.id}");
     var recipeProvider = Provider.of<FeedToId>(context, listen: false);
     recipeProvider.changeData(widget.id);
-    TotalServings servings = TotalServings();
-    print("no of servings are: ${servings.getTotalServings()}");
     super.initState();
   }
 
@@ -38,6 +31,10 @@ class _RecipeCardState extends State<RecipeCard> {
       'protein',
       'fat',
       'calories'
+    ];
+
+    List<String> nutritionIcon = [
+      '🌾', '🥕', '🍗', '🍕', '🔥',
     ];
 
     return Scaffold(
@@ -68,8 +65,10 @@ class _RecipeCardState extends State<RecipeCard> {
         centerTitle: true,
         backgroundColor: kAppBackground,
       ),
-      body: ListView(shrinkWrap: false, children: [
-        Column(
+      body: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        physics: const ClampingScrollPhysics(),
+        child: Column(
           // mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -144,16 +143,15 @@ class _RecipeCardState extends State<RecipeCard> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
-                        'Ingredients for',
+                        '🛒 Ingredients for',
                         style: kSubHeading,
                       ),
                       Row(
                         children: [
                           IconButton(
                             onPressed: () {
-                              var servingInfo = Provider.of<TotalServings>(
-                                  context,
-                                  listen: false);
+                              var servingInfo =
+                                  Provider.of<FeedToId>(context, listen: false);
                               servingInfo.decreaseServings();
                             },
                             icon: const Icon(
@@ -161,19 +159,18 @@ class _RecipeCardState extends State<RecipeCard> {
                               color: Colors.pinkAccent,
                             ),
                           ),
-                          Consumer<TotalServings>(
+                          Consumer<FeedToId>(
                             builder: (context, totalServings, child) {
                               return Text(
                                 totalServings.getTotalServings().toString(),
-                                style: const TextStyle(color: Colors.white),
+                                style: const TextStyle(color: kServingsColor),
                               );
                             },
                           ),
                           IconButton(
                             onPressed: () {
-                              var servingInfo = Provider.of<TotalServings>(
-                                  context,
-                                  listen: false);
+                              var servingInfo =
+                                  Provider.of<FeedToId>(context, listen: false);
                               servingInfo.increaseServings();
                             },
                             icon: const Icon(
@@ -202,13 +199,15 @@ class _RecipeCardState extends State<RecipeCard> {
                             children: [
                               Text(
                                 list.getIngredientData()![index]![0],
-                                style: const TextStyle(color: Colors.white),
+                                style:
+                                    const TextStyle(color: kIngredientsColor),
                               ),
                               Text(
                                 list.getIngredientData()![index]!.length == 3
                                     ? "${list.getIngredientData()![index]![1]}  ${list.getIngredientData()![index]![2]}"
                                     : "${list.getIngredientData()![index]![1]}",
-                                style: const TextStyle(color: Colors.white),
+                                style: const TextStyle(
+                                    color: kIngredientQuantityColor),
                               ),
                             ],
                           ),
@@ -222,7 +221,7 @@ class _RecipeCardState extends State<RecipeCard> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
-                        'Nutrition Info',
+                        '📃 Nutrition Info',
                         style: kSubHeading,
                       ),
                       Row(
@@ -266,16 +265,15 @@ class _RecipeCardState extends State<RecipeCard> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(
-                                    nutritionType[index].toUpperCase(),
-                                    style: const TextStyle(color: Colors.white),
-                                  ),
+                                  Text("${nutritionIcon[index]}  ${nutritionType[index].toUpperCase()}", style: const TextStyle(color: kNutritionInfoColor),),
+                                  // TextWithFontAwesome(iconName: nutritionIcon[index], colorIcon: kNutritionInfoColor, text: nutritionType[index].toUpperCase()),
                                   Text(
                                     list
                                         .getNutritionData()![
                                             nutritionType[index]]
                                         .toString(),
-                                    style: const TextStyle(color: Colors.white),
+                                    style: const TextStyle(
+                                        color: kNutritionQuanColor),
                                   ),
                                 ],
                               ),
@@ -290,14 +288,14 @@ class _RecipeCardState extends State<RecipeCard> {
             Container(
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
-                  color: Colors.white12),
+                  color: kPreparationContainerColor),
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const Text(
-                      'Preparation',
+                      '🔪 Preparation',
                       style: kSubHeading,
                     ),
                     Padding(
@@ -329,16 +327,9 @@ class _RecipeCardState extends State<RecipeCard> {
                           shrinkWrap: true,
                           itemCount: list.getInstructions()!.length,
                           itemBuilder: (BuildContext context, int index) {
-                            return SizedBox(
-                              height: 75,
-                              // color: kAppBackground,
-
-                              child: Center(
-                                child: InstructionCard(
-                                  srNo: (index + 1).toString(),
-                                  instruction: list.getInstructions()![index],
-                                ),
-                              ),
+                            return InstructionCard(
+                              srNo: (index + 1).toString(),
+                              instruction: list.getInstructions()![index],
                             );
                           });
                     })
@@ -348,7 +339,7 @@ class _RecipeCardState extends State<RecipeCard> {
             ),
           ],
         ),
-      ]),
+      ),
     );
   }
 }

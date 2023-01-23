@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:food_recipe/Model/feed_to_id.dart';
 import 'package:food_recipe/cards/recipe_card_detail.dart';
+import 'package:food_recipe/constants.dart';
 import 'package:provider/provider.dart';
-
 import '../Model/show_nutrition.dart';
-import '../Model/total_servings.dart';
 
 class FeedRecipeCard extends StatelessWidget {
   const FeedRecipeCard(
@@ -17,20 +16,15 @@ class FeedRecipeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          height: 160,
+          height: 150,
           width: 150,
           child: InkWell(
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute(
                   builder: (context) => MultiProvider(
                         providers: [
-                          ChangeNotifierProvider(
-                              create: (_) => TotalServings()),
-                          // ChangeNotifierProvider(create: (_) => Recipe()),
                           ChangeNotifierProvider(create: (_) => FeedToId()),
                           ChangeNotifierProvider(
                               create: (_) => ShowNutrition()),
@@ -38,25 +32,29 @@ class FeedRecipeCard extends StatelessWidget {
                         child: RecipeCard(id: recipeid),
                       )));
             },
-            child: Container(
-              decoration:
-                  BoxDecoration(borderRadius: BorderRadius.circular(50)),
-              child: Image.network(
-                src,
-                fit: BoxFit.fill,
-              ),
+            child: Image.network(
+              src,
+              fit: BoxFit.fill,
             ),
           ),
         ),
         const SizedBox(
-          height: 15,
+          height: 8,
         ),
         SizedBox(
           width: 150,
-          child: Text(
-            name,
-            style: const TextStyle(
-                color: Colors.white, fontSize: 17, fontWeight: FontWeight.w500
+          height: 70,
+          // decoration: BoxDecoration(
+          //   borderRadius: BorderRadius.circular(15),
+          //   color: kContainerColor
+          // ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            child: Text(
+              name,
+              style: const TextStyle(
+                  color: kTextColor, fontSize: 17, fontWeight: FontWeight.w500
+              ),
             ),
           ),
         ),

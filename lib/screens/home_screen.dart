@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:food_recipe/Model/feed_recipes.dart';
+import 'package:food_recipe/Model/recipe.dart';
+import 'package:food_recipe/Model/search_recipes.dart';
+import 'package:food_recipe/Model/show_nutrition.dart';
 import 'package:food_recipe/cards/feed_recipe_card.dart';
 import 'package:food_recipe/constants.dart';
+import 'package:food_recipe/screens/search_screen.dart';
 import 'package:provider/provider.dart';
 
 import '../Model/feed_to_id.dart';
@@ -21,7 +25,6 @@ class _HomeScreenState extends State<HomeScreen> {
     feedProvider.changeData();
 
     var idRecipeProvider = Provider.of<FeedToId>(context, listen: false);
-    idRecipeProvider.getData(8578);
     super.initState();
   }
 
@@ -32,10 +35,26 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: kAppBackground,
         title: Container(
           decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(30), color: Colors.white12),
+            borderRadius: BorderRadius.circular(30),
+            color: Colors.white12,
+          ),
           child: TextField(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => MultiProvider(
+                    providers: [
+                      ChangeNotifierProvider(create: (_) => Recipe()),
+                      ChangeNotifierProvider(create: (_) => ShowNutrition()),
+                      ChangeNotifierProvider(create: (_) => Search())
+                    ],
+                    child: const SearchScreen(),
+                  ),
+                ),
+              );
+            },
             controller: TextEditingController(),
-            textAlign: TextAlign.start,
+            textAlign: TextAlign.left,
             autofocus: false,
             decoration: const InputDecoration(
               focusedBorder: UnderlineInputBorder(
@@ -44,7 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
               enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(color: Colors.white12)),
               alignLabelWithHint: false,
-              prefix: Icon(
+              icon: Icon(
                 Icons.search,
                 color: Colors.white,
               ),
@@ -73,9 +92,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             height: 15,
                           ),
                           const Text(
-                            'Easy to Cook Menu',
+                            'Eat Until It Bursts ',
                             style: TextStyle(
-                                color: Colors.white,
+                                color: kLargeFontColor,
                                 fontSize: 25,
                                 fontWeight: FontWeight.bold),
                           ),
@@ -85,15 +104,19 @@ class _HomeScreenState extends State<HomeScreen> {
                           Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(30),
-                              color: Color(0xFF1A120B)
+                              color: kContainerColor,
                             ),
-                            child:  const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 10, vertical:8),
+                            child: const Padding(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 8),
                               child: Text(
                                 'Weekly Meal Planning Made Easy 🍴',
                                 style: kSubHeading,
                               ),
                             ),
+                          ),
+                          const SizedBox(
+                            height: 20,
                           ),
                           SizedBox(
                             height: 240,
@@ -198,29 +221,3 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// return Row(
-//   children: [
-//     Column(
-//       children: [
-//         FeedRecipeCard(
-//           src: tempData["poster_url"],
-//           name: tempData["title"],
-//           recipeid: tempData["recipe_id"],
-//         ),
-//       ],
-//     ),
-//     const SizedBox(
-//       width: 15,
-//     ),
-//     Column(
-//       children: [
-//         FeedRecipeCard(
-//           src: tempData2["poster_url"],
-//           name: tempData2["title"],
-//           recipeid: tempData2["recipe_id"],
-//         ),
-//       ],
-//     )
-//   ],
-// );
-//           src: tempData["poster_url"],
