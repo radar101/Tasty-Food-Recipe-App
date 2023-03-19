@@ -18,6 +18,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+
   @override
   void initState() {
     // TODO: implement initState
@@ -187,7 +188,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             style: kSubHeading,
                           ),
                           SizedBox(
-                              height: 500,
+                              height: 700,
                               width: double.infinity,
                               child: GridView.builder(
                                   itemCount:
@@ -195,8 +196,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                   gridDelegate:
                                       const SliverGridDelegateWithFixedCrossAxisCount(
                                           crossAxisCount: 2,
-                                          crossAxisSpacing: 30.0,
-                                          mainAxisSpacing: 80.0),
+                                          crossAxisSpacing: 10.0,
+                                          mainAxisSpacing: 10.0),
                                   itemBuilder: (context, index) {
                                     List totalRecipes =
                                         data.getTotalResults()["Recents"]!;

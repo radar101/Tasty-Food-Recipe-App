@@ -42,6 +42,10 @@ dependencies:
   video_player: ^2.5.1
   group_button: ^5.2.2
   font_awesome_flutter: ^10.3.0
+  social_share: ^2.3.1
+  share_plus: ^6.3.0
+  translator: ^0.1.7
+  flutter_tts: ^3.6.3
 
 dev_dependencies:
   flutter_test:

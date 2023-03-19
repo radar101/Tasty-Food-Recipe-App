@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:food_recipe/Model/feed_to_id.dart';
 import 'package:food_recipe/Model/show_nutrition.dart';
 import 'package:food_recipe/cards/instruction_card.dart';
 import 'package:food_recipe/constants.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class RecipeCard extends StatefulWidget {
@@ -23,6 +26,13 @@ class _RecipeCardState extends State<RecipeCard> {
     super.initState();
   }
 
+  String removeCircumflex(String s){
+    if(s[0] == 'Â'){
+      s = s.substring(1);
+    }
+    return s;
+  }
+
   @override
   Widget build(BuildContext context) {
     List<String> nutritionType = [
@@ -34,19 +44,38 @@ class _RecipeCardState extends State<RecipeCard> {
     ];
 
     List<String> nutritionIcon = [
-      '🌾', '🥕', '🍗', '🍕', '🔥',
+      '🌾',
+      '🥕',
+      '🍗',
+      '🍕',
+      '🔥',
     ];
 
     return Scaffold(
       appBar: AppBar(
         actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(
-              Icons.share,
-              color: Colors.pinkAccent,
-            ),
-          ),
+          Consumer<FeedToId>(builder: (context, list, child) {
+            return IconButton(
+              onPressed: () async {
+                String empty = '';
+                empty += list.getTitle()!;
+                empty += '\n';
+                for (int i = 0; i < list.getIngredientData()!.length; i++) {
+                  empty += list.getIngredientData()![i]![0];
+                  empty += ': ';
+                  empty += list.getIngredientData()![i]!.length == 3
+                      ? "${list.getIngredientData()![i]![1]}  ${list.getIngredientData()![i]![2]}"
+                      : "${list.getIngredientData()![i]![1]}";
+                  empty += '\n';
+                }
+                await Share.share(empty);
+              },
+              icon: const Icon(
+                Icons.share,
+                color: Colors.pinkAccent,
+              ),
+            );
+          }),
           IconButton(
             onPressed: () {},
             icon: const Icon(
@@ -54,14 +83,40 @@ class _RecipeCardState extends State<RecipeCard> {
               color: Colors.pinkAccent,
             ),
           ),
+          Consumer<FeedToId>(
+            builder: (context, list, child) {
+              return IconButton(
+                onPressed: () {
+                  list.translate();
+                },
+                icon: const Icon(Icons.translate),
+                color: Colors.pinkAccent,
+              );
+            },
+          ),
+          Consumer<FeedToId>(builder: (context, list, child) {
+            return IconButton(
+                onPressed: () async {
+                  list.voiceOver();
+                },
+                icon: const FaIcon(
+                  FontAwesomeIcons.volumeHigh,
+                  color: Colors.pinkAccent,
+                ));
+          })
         ],
         iconTheme: const IconThemeData(
           color: Colors.pinkAccent,
         ),
-        leading: IconButton(
-          onPressed: () => Navigator.of(context).pop(),
-          icon: const Icon(Icons.arrow_back_outlined),
-        ),
+        leading: Consumer<FeedToId>(builder: (context, list, child) {
+          return IconButton(
+            onPressed: () {
+              list.flutterTts.stop();
+              Navigator.of(context).pop();
+            },
+            icon: const Icon(Icons.arrow_back_outlined),
+          );
+        }),
         centerTitle: true,
         backgroundColor: kAppBackground,
       ),
@@ -197,14 +252,17 @@ class _RecipeCardState extends State<RecipeCard> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                list.getIngredientData()![index]![0],
-                                style:
-                                    const TextStyle(color: kIngredientsColor),
+                              Expanded(
+                                child: Text(
+                                  list.getIngredientData()![index]![0],
+                                  style:
+                                      const TextStyle(color: kIngredientsColor),
+                                  softWrap: false,
+                                ),
                               ),
                               Text(
                                 list.getIngredientData()![index]!.length == 3
-                                    ? "${list.getIngredientData()![index]![1]}  ${list.getIngredientData()![index]![2]}"
+                                    ? "${removeCircumflex(list.getIngredients()![index])}  ${list.getIngredientData()![index]![2]}"
                                     : "${list.getIngredientData()![index]![1]}",
                                 style: const TextStyle(
                                     color: kIngredientQuantityColor),
@@ -265,7 +323,11 @@ class _RecipeCardState extends State<RecipeCard> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text("${nutritionIcon[index]}  ${nutritionType[index].toUpperCase()}", style: const TextStyle(color: kNutritionInfoColor),),
+                                  Text(
+                                    "${nutritionIcon[index]}  ${nutritionType[index].toUpperCase()}",
+                                    style: const TextStyle(
+                                        color: kNutritionInfoColor),
+                                  ),
                                   // TextWithFontAwesome(iconName: nutritionIcon[index], colorIcon: kNutritionInfoColor, text: nutritionType[index].toUpperCase()),
                                   Text(
                                     list

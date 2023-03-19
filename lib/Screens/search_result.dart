@@ -47,8 +47,8 @@ class _SearchResultState extends State<SearchResult> {
                           gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 2,
-                              crossAxisSpacing: 9.0,
-                              mainAxisSpacing: 60.0),
+                              crossAxisSpacing: 10.0,
+                              mainAxisSpacing: 20.0),
                           itemBuilder: (context, index) {
                             List totalRecipes =
                             data.getTotalResults()[widget.tag]!;

@@ -15,11 +15,16 @@ class FeedRecipeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String shortText(String s){
+      s = s.substring(0, 35);
+      s = s + '...';
+      return s;
+    }
     return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        SizedBox(
-          height: 150,
-          width: 150,
+        Expanded(
           child: InkWell(
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute(
@@ -35,6 +40,8 @@ class FeedRecipeCard extends StatelessWidget {
             child: Image.network(
               src,
               fit: BoxFit.fill,
+              width: 150,
+              // height: 150,
             ),
           ),
         ),
@@ -43,18 +50,11 @@ class FeedRecipeCard extends StatelessWidget {
         ),
         SizedBox(
           width: 150,
-          height: 70,
-          // decoration: BoxDecoration(
-          //   borderRadius: BorderRadius.circular(15),
-          //   color: kContainerColor
-          // ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            child: Text(
-              name,
-              style: const TextStyle(
-                  color: kTextColor, fontSize: 17, fontWeight: FontWeight.w500
-              ),
+          height: 50,
+          child: Text(
+            name.length < 35 ? name : shortText(name),
+            style: const TextStyle(
+                color: kTextColor, fontSize: 15, fontWeight: FontWeight.w500
             ),
           ),
         ),
